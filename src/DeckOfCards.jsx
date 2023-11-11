@@ -1,45 +1,73 @@
 import React, { useState, useEffect } from "react";
 import axios from "axios"
+import Card from "./Card.jsx";
+import "./DeckOfCards.css"
+
 
 function DeckOfCards() {
     const [deck, setDeck] = useState(null);
-    const [drawnCard, setDrawnCard] = useState([])
+    const [drawnCard, setDrawnCard] = useState([]);
+    const [shuffle, setCupidShuffle] = useState(false);
 
-    useEffect(() => {
-        async function newDeck() {
-            const res = await axios.get(`https://deckofcardsapi.com/api/deck/new/shuffle`);
-            setDeck(res.data);
+    //create deck
+    useEffect(function newDeck() {
+        async function deckAPIData() {
+            const deckAPI = await axios.get(`https://deckofcardsapi.com/api/deck/new/shuffle/`)
+            setDeck(deckAPI.data);
         }
-        return newDeck()
+        deckAPIData();
     }, [])
 
-    async function drawFromDeck() {
-        const deckRes = await axios.get(`https://deckofcardsapi.com/api/deck/${deck.deck_id}/draw/`)
+    //draw card
+    async function drawCardFromDeck() {
+        try {
+            const cardAPI = await axios.get(`https://deckofcardsapi.com/api/deck/${deck.deck_id}/draw/`)
+            console.log(cardAPI.data);
 
-        if (deckRes.data.remaining > 0) {
-            const card = drawRes.data.cards[0];
+            if (cardAPI.data.remaining === 0) throw new Error("this deck em pty YEEEET.");
 
-            setDrawnCard(drawnDeck => [...drawnDeck,
-            {
-                code: card.code,
-                type: `${card.suit} ${card.value}`,
-                image: card.image
-            }])
+            const cardData = cardAPI.data.cards[0];
+            console.log(cardData.image);
+
+            setDrawnCard(sdc => [
+                ...sdc,
+                {
+                    key: cardData.code,
+                    image: cardData.image
+                }
+            ])
+        } catch (err) {
+            alert(err);
+            <div>
+                < button className="Cupid-shuffler" onClick={shuffleDeck} disabled={shuffle}> NOW DO THE CUPID SHUFFLE</button >
+            </div >
         }
-        else {
-            alert('Error: no cards remaining!');
+    }
+
+    //shuffle deck
+    async function shuffleDeck() {
+        setCupidShuffle(true);
+        try {
+            await axios.get(`https://deckofcardsapi.com/api/deck/${deck.deck_id}/shuffle/`);
+            setCupidShuffle(false);
+            setDrawnCard([])
+        } catch (err) {
+            alert(err);
+            setCupidShuffle(false);
+            setDrawnCard([])
         }
     }
 
 
+
     return (
         <div className="DeckOfCards">
-            <button onClick={drawFromDeck}>GIB CARD</button>
-            <div className="DrawnCards">{
-                drawnCard.map(dk => (
-                    <img className="Card" alt={dk.code} src={image} />
-                ))
-            }
+            <button className="Card-gibber" onClick={drawCardFromDeck} disabled={shuffle}>GIB CARD</button>
+
+            <div className="Drawn-Card">
+                {drawnCard.map(dc =>
+                    <Card key={dc.key} image={dc.image} />
+                )}
             </div>
         </div>
     )

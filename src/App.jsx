@@ -1,5 +1,5 @@
 import './App.css';
-import DeckOfCards from './DeckOfCards';
+import DeckOfCards from './DeckOfCards.jsx';
 
 function App() {
   return (
