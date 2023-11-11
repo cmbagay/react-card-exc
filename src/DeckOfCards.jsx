@@ -8,7 +8,7 @@ function DeckOfCards() {
     const [deck, setDeck] = useState(null);
     const [drawnCard, setDrawnCard] = useState([]);
     const [shuffle, setCupidShuffle] = useState(false);
-
+    const [showShuffleBtn, setShowShuffleBtn] = useState(false);
     //create deck
     useEffect(function newDeck() {
         async function deckAPIData() {
@@ -38,9 +38,7 @@ function DeckOfCards() {
             ])
         } catch (err) {
             alert(err);
-            <div>
-                < button className="Cupid-shuffler" onClick={shuffleDeck} disabled={shuffle}> NOW DO THE CUPID SHUFFLE</button >
-            </div >
+            setShowShuffleBtn(true);
         }
     }
 
@@ -49,10 +47,12 @@ function DeckOfCards() {
         setCupidShuffle(true);
         try {
             await axios.get(`https://deckofcardsapi.com/api/deck/${deck.deck_id}/shuffle/`);
-            setCupidShuffle(false);
-            setDrawnCard([])
+            setShowShuffleBtn(false);
+
         } catch (err) {
             alert(err);
+
+        } finally {
             setCupidShuffle(false);
             setDrawnCard([])
         }
@@ -62,7 +62,8 @@ function DeckOfCards() {
 
     return (
         <div className="DeckOfCards">
-            <button className="Card-gibber" onClick={drawCardFromDeck} disabled={shuffle}>GIB CARD</button>
+            {!showShuffleBtn && <button className="Card-gibber" onClick={drawCardFromDeck} disabled={shuffle}>GIB CARD</button>}
+            {showShuffleBtn && <button className="Cupid-shuffler" onClick={shuffleDeck} disabled={shuffle}> NOW DO THE CUPID SHUFFLE</button >}
 
             <div className="Drawn-Card">
                 {drawnCard.map(dc =>
